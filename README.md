@@ -136,6 +136,40 @@ For native analysis, configure a provider first. See the
 [CLI and Evidence guide](docs/cli.md) for native commands, provider selection,
 snapshots and scripting.
 
+### Run from Docker
+
+With Docker Engine running, build the image from the repository root:
+
+```powershell
+docker build -t rea:local .
+```
+
+MCP clients use stdio. Configure the client to launch `docker` with these
+arguments, replacing the host path with the directory to inspect:
+
+```json
+[
+  "run",
+  "--rm",
+  "-i",
+  "--mount",
+  "type=bind,source=C:\\path\\to\\app,target=/workspace,readonly",
+  "rea:local"
+]
+```
+
+To use the CLI directly, mount a target directory and pass its container path
+to a command:
+
+```powershell
+$target = (Resolve-Path 'C:\path\to\app').Path
+docker run --rm --mount "type=bind,source=$target,target=/target,readonly" rea:local analyze-javascript-application /target --json
+```
+
+The image includes Node.js, Chromium, `ps`, and Python for REA's Linux workflows;
+analysis providers such as Ghidra, IDA, Hopper, and Kuna are not bundled. Mount
+any target files the container must inspect.
+
 ### Update REA
 
 REA changes quickly, and new releases include frequent bug fixes. Keep your
